@@ -31,7 +31,8 @@ function getUser(req, res) {
         });
     }
     else {
-        console.log("no query");
+        console.log("incorrect query");
+        res.json({query: req.query});
     }
 }
 
