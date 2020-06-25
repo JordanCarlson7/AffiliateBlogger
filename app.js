@@ -15,13 +15,13 @@ const pool = new Pool({connectionString: connectionString});
 function displayHomePage(req, res) {
     console.log("Connected to the Homepage");
 
-
+if (req.query.id) {
     var id =  req.query.id;
     getPersonFromDb(id, function (error, result) {
         if (error || result == null || result.length != 1) {
             response.status(500).json({data: error});
 
-            
+
         }
         else {
         console.log("back grom data base with result", result);
@@ -29,13 +29,19 @@ function displayHomePage(req, res) {
         }
     });
 }
+else {
+    console.log("no query");
+}
+    
+}
 
 function getPersonFromDb(id, callback) {
+
     console.log("getPersonFromDb with id:", id);
     var sql = "SELECT * FROM users WHERE id = $1::int";
     var params = [id];
 
-    pool.query(sql, params, function(err, result) {
+    pool.query(sql, params, function (err, result) {
         if (err || result === 'undefined') {
             console.log("error in DB");
             console.log(err);
