@@ -1,5 +1,6 @@
 const { Pool } = require('pg')
 var express = require('express');
+const { response } = require('express');
 var app = new express();
 
 
@@ -17,12 +18,12 @@ function displayHomePage(req, res) {
 
     var id =  req.query.id;
     getPersonFromDb(id, function (error, result) {
-        if (error) {
-            res(error);
+        if (error || result == null || result.length != 1) {
+            response.status(500).json({data: error});
         }
         else {
         console.log("back grom data base with result", result);
-        res.json(result);
+        res.json(result[0]);
         }
     });
 }
@@ -33,7 +34,7 @@ function getPersonFromDb(id, callback) {
     var params = [id];
 
     pool.query(sql, params, function(err, result) {
-        if (err) {
+        if (err || result === 'undefined') {
             console.log("error in DB");
             console.log(err);
             callback(err, null);
