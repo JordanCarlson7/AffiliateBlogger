@@ -20,6 +20,8 @@ function displayHomePage(req, res) {
     getPersonFromDb(id, function (error, result) {
         if (error || result == null || result.length != 1) {
             response.status(500).json({data: error});
+
+            
         }
         else {
         console.log("back grom data base with result", result);
