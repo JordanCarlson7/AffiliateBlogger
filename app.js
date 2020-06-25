@@ -9,14 +9,20 @@ app.get("/", function (req, res) {
     res.send("just a homepage");
 })
 app.get("/getUser", getUser);
+app.get("/getBlog", getBlogs);
+app.get("/getAffiliates", getAffiliates);
+app.get("/getAttachments", getAttachments);
 
 //----------
 //Pooling
 const connectionString = process.env.DATABASE_URL || "postgress://localtester:localpassword@localhost:5432/affiliate_blogger";
 const pool = new Pool({ connectionString: connectionString });
-
+//----------------------------------------------------------------------------------------
+//----------
+//GETTING THE USER
+//getUser
 function getUser(req, res) {
-    console.log("Connected to the Homepage");
+    console.log("Connected to GET USER");
 
     if (req.query.id) {
         var id = req.query.id;
@@ -35,7 +41,7 @@ function getUser(req, res) {
         res.json({query: req.query});
     }
 }
-
+//Pool:getUser
 function getPersonFromDb(id, callback) {
 
     console.log("getPersonFromDb with id:", id);
@@ -60,7 +66,155 @@ function getPersonFromDb(id, callback) {
         callback(err, null);
     }
 }
+//--------------------------------------------------------------------------------------------------------
+//--------
+//GETTING BLOGS
+function getBlogs(req, res) {
+    console.log("Connected to GET BLOG");
 
+    if (req.query.id) {
+        var id = req.query.id;
+        getBlogsFromDb(id, function (error, result) {
+            if (error || result == null) {
+                res.status(500).json({ data: error });
+            }
+            else {
+                console.log("back grom data base with result", result);
+                res.json(result);
+            }
+        });
+    }
+    else {
+        console.log("incorrect query");
+        res.json({query: req.query});
+    }
+}
+//Pool:getBlogs
+function getBlogsFromDb(id, callback) {
+
+    console.log("getBlogsFromDb with id:", id);
+    var sql = "SELECT * FROM blogs WHERE id = $1::int";
+    var params = [id];
+
+    try {
+        pool.query(sql, params, function (err, result) {
+            if (err || result == 'undefined') {
+                console.log("error in DB");
+                console.log(err);
+                callback(err, null);
+            }
+            else {
+                console.log("DB Result" + JSON.stringify(result.rows));
+                callback(null, result.rows);
+            }
+        })
+    }
+    catch (err) {
+        console.log("Attempted connection but...", err);
+        callback(err, null);
+    }
+}
+//------------------------------------------------------------------------------------------------
+//----------------------
+//GET AFFILIATES
+//getAffiliates
+function getAffiliates(req, res) {
+    console.log("Connected to GET AFFILIATES");
+
+    if (req.query.id) {
+        var id = req.query.id;
+        getAffiliatesFromDb(id, function (error, result) {
+            if (error || result == null) {
+                res.status(500).json({ data: error });
+            }
+            else {
+                console.log("back grom data base with result", result);
+                res.json(result);
+            }
+        });
+    }
+    else {
+        console.log("incorrect query");
+        res.json({query: req.query});
+    }
+}
+//Pool:getAffiliates
+function getAffiliatesFromDb(id, callback) {
+
+    console.log("getAffiliatesFromDb with id:", id);
+    var sql = "SELECT * FROM affiliates WHERE user_id = $1::int";
+    var params = [id];
+
+    try {
+        pool.query(sql, params, function (err, result) {
+            if (err || result == 'undefined') {
+                console.log("error in DB");
+                console.log(err);
+                callback(err, null);
+            }
+            else {
+                console.log("DB Result" + JSON.stringify(result.rows));
+                callback(null, result.rows);
+            }
+        })
+    }
+    catch (err) {
+        console.log("Attempted connection but...", err);
+        callback(err, null);
+    }
+}
+//------------------------------------------------------------------------------------------
+//-----------
+//GET ATTACHMENTS
+//getAttatchments
+function getAttachments(req, res) {
+    console.log("Connected to GET ATTACHMENTS");
+
+    if (req.query.id) {
+        var id = req.query.id;
+        getAttachmentsFromDb(id, function (error, result) {
+            if (error || result == null) {
+                res.status(500).json({ data: error });
+            }
+            else {
+                console.log("back grom data base with result", result);
+                res.json(result);
+            }
+        });
+    }
+    else {
+        console.log("incorrect query");
+        res.json({query: req.query});
+    }
+}
+//Pool:getAttachments
+function getAttachmentsFromDb(id, callback) {
+
+    console.log("getAttachmentsFromDb with id:", id);
+    var sql = "SELECT * FROM attachments WHERE blog_id = $1::int";
+    var params = [id];
+
+    try {
+        pool.query(sql, params, function (err, result) {
+            if (err || result == 'undefined') {
+                console.log("error in DB");
+                console.log(err);
+                callback(err, null);
+            }
+            else {
+                console.log("DB Result" + JSON.stringify(result.rows));
+                callback(null, result.rows);
+            }
+        })
+    }
+    catch (err) {
+        console.log("Attempted connection but...", err);
+        callback(err, null);
+    }
+}
+//---------------------------------------------------------------------------------------------------
+
+//LocalHost Listening
 app.listen(app.get("port"), function () {
     console.log("Listening on port:" + app.get("port"));
 });
