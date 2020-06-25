@@ -2,15 +2,14 @@ const { Pool } = require('pg')
 var express = require('express');
 var app = new express();
 
-//----------
-//Pooling
-const connectionString = process.env.DATABASE_URL || "postgress://localtester:localpassword@localhost:5432/affiliate_blogger";
-const pool = new Pool({connectionString: connectionString});
-
 
 app.set("port", (process.env.PORT || 5000));
 app.get("/", displayHomePage);
 
+//----------
+//Pooling
+const connectionString = process.env.DATABASE_URL || "postgress://localtester:localpassword@localhost:5432/affiliate_blogger";
+const pool = new Pool({connectionString: connectionString});
 
 function displayHomePage(req, res) {
     console.log("Connected to the Homepage");
@@ -18,16 +17,15 @@ function displayHomePage(req, res) {
 
     var id =  req.query.id;
     getPersonFromDb(id, function (error, result) {
+        if (error) {
+            res(error);
+        }
+        else {
         console.log("back grom data base with result", result);
         res.json(result);
+        }
     });
-
-
 }
-
-app.listen(app.get("port"), function() {
-    console.log("Listening on port:" + app.get("port"));
-});
 
 function getPersonFromDb(id, callback) {
     console.log("getPersonFromDb with id:", id);
@@ -40,7 +38,13 @@ function getPersonFromDb(id, callback) {
             console.log(err);
             callback(err, null);
         }
+        else {
         console.log("DB Result" + JSON.stringify(result.rows));
         callback(null, result.rows); 
+        }
     })
 }
+
+app.listen(app.get("port"), function() {
+    console.log("Listening on port:" + app.get("port"));
+});
