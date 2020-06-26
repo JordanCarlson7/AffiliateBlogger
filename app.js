@@ -8,12 +8,12 @@ const connectionString = process.env.DATABASE_URL || "postgress://localtester:lo
 const pool = new Pool({ connectionString: connectionString });
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
-app.use('public', express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public')));
 app.set("port", (process.env.PORT || 5000));
 //----------------------------------SETUP
 //ROUTES---------------------------------
 app.get("/", function (req, res) {
-    res.sendFile('/html/welcomeStatic.html');
+    res.sendFile('public/html/welcomeStatic.html', {root: __dirname});
 })
 app.get("/visitor", showVisitorBlog);
 app.get("/getUser", getUser);
