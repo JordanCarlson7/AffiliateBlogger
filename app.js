@@ -43,7 +43,7 @@ function showVisitorBlog(req, res) {
                 date: result[0].date,
                 content: content
             }
-            res.render("homepage.ejs", params);
+            res.render("homePage.ejs", params);
         }
     })
 }
