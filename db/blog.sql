@@ -47,3 +47,8 @@ INSERT INTO affiliates (user_id, company, hyperlink) VALUES ('1', 'GoPro', 'http
 INSERT INTO affiliates (user_id, company, hyperlink) VALUES ('1', 'Heroku PHP', 'https://aqueous-savannah-82826.herokuapp.com/');
 --Insert attachments
 INSERT INTO attachments (blog_id, file_path) VALUES ('1', '../attachments/test_attachmnet');
+
+
+--GETTING--
+--author and blog
+SELECT * FROM blogs JOIN users ON blogs.user_id = users.id;

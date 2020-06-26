@@ -1,24 +1,79 @@
+//SETUP---------------------------------
 const { Pool } = require('pg')
 var express = require('express');
+var path = require('path');
 const { response } = require('express');
 var app = new express();
-
-
+const connectionString = process.env.DATABASE_URL || "postgress://localtester:localpassword@localhost:5432/affiliate_blogger";
+const pool = new Pool({ connectionString: connectionString });
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'ejs');
+app.use('public', express.static(path.join(__dirname, 'public')));
 app.set("port", (process.env.PORT || 5000));
+//----------------------------------SETUP
+//ROUTES---------------------------------
 app.get("/", function (req, res) {
-    res.send("just a homepage");
+    res.sendFile('/html/welcomeStatic.html');
 })
+app.get("/visitor", showVisitorBlog);
 app.get("/getUser", getUser);
 app.get("/getBlog", getBlogs);
 app.get("/getAffiliates", getAffiliates);
 app.get("/getAttachments", getAttachments);
+//--------------------------------ROUTES
 
-//----------
-//Pooling
-const connectionString = process.env.DATABASE_URL || "postgress://localtester:localpassword@localhost:5432/affiliate_blogger";
-const pool = new Pool({ connectionString: connectionString });
-//----------------------------------------------------------------------------------------
-//----------
+//CODE----------------------------------------------------------------------------------------------------------------------------------------------
+
+//SHOWING A VISITOR A BLOG
+function showVisitorBlog(req, res) {
+    //var author = 'nothing';
+
+    getBlogsJoinUsersFromDb(1, function (err, result) {
+        if (err) {
+            console.log("getBlogs From ERR", err);
+        }
+        else {
+            //console.log("RESULT WAS", result);
+            var content = result[0].content;
+
+            var params = {
+                author: result[0].user_name,
+                title: result[0].title,
+                subject: result[0].subject,
+                date: result[0].date,
+                content: content
+            }
+            res.render("homepage.ejs", params);
+        }
+    })
+}
+//Pool:getBlogsJoinUsers
+function getBlogsJoinUsersFromDb(id, callback) {
+
+    console.log("getBlogsJOINUsersFromDb with id:", id);
+    var sql = "SELECT user_name, title, subject, date, content FROM blogs JOIN users on blogs.user_id = $1::int AND users.id = $1::int";
+    var params = [id];
+
+    try {
+        pool.query(sql, params, function (err, result) {
+            if (err || result == 'undefined') {
+                console.log("error in DB");
+                console.log(err);
+                callback(err, null);
+            }
+            else {
+                console.log("DB Result" + JSON.stringify(result.rows));
+                callback(null, result.rows);
+            }
+        })
+    }
+    catch (err) {
+        console.log("Attempted connection but...", err);
+        callback(err, null);
+    }
+}
+//-------------------------------------------------------------------------------------------------------------
+//----------------------------------------------------------
 //GETTING THE USER
 //getUser
 function getUser(req, res) {
@@ -38,7 +93,7 @@ function getUser(req, res) {
     }
     else {
         console.log("incorrect query");
-        res.json({query: req.query});
+        res.json({ query: req.query });
     }
 }
 //Pool:getUser
@@ -66,8 +121,8 @@ function getPersonFromDb(id, callback) {
         callback(err, null);
     }
 }
-//--------------------------------------------------------------------------------------------------------
-//--------
+//---------------------------------------------------------------------------------------------------
+
 //GETTING BLOGS
 function getBlogs(req, res) {
     console.log("Connected to GET BLOG");
@@ -75,7 +130,7 @@ function getBlogs(req, res) {
     if (req.query.id) {
         var id = req.query.id;
         getBlogsFromDb(id, function (error, result) {
-            if (error || result == null) {
+            if (error || result == null || result.length == 0) {
                 res.status(500).json({ data: error });
             }
             else {
@@ -86,7 +141,7 @@ function getBlogs(req, res) {
     }
     else {
         console.log("incorrect query");
-        res.json({query: req.query});
+        res.json({ query: req.query });
     }
 }
 //Pool:getBlogs
@@ -114,8 +169,8 @@ function getBlogsFromDb(id, callback) {
         callback(err, null);
     }
 }
-//------------------------------------------------------------------------------------------------
-//----------------------
+//-------------------------------------------------------------------------------------------------------------
+
 //GET AFFILIATES
 //getAffiliates
 function getAffiliates(req, res) {
@@ -124,7 +179,7 @@ function getAffiliates(req, res) {
     if (req.query.id) {
         var id = req.query.id;
         getAffiliatesFromDb(id, function (error, result) {
-            if (error || result == null) {
+            if (error || result == null || result.length == 0) {
                 res.status(500).json({ data: error });
             }
             else {
@@ -135,7 +190,7 @@ function getAffiliates(req, res) {
     }
     else {
         console.log("incorrect query");
-        res.json({query: req.query});
+        res.json({ query: req.query });
     }
 }
 //Pool:getAffiliates
@@ -164,7 +219,7 @@ function getAffiliatesFromDb(id, callback) {
     }
 }
 //------------------------------------------------------------------------------------------
-//-----------
+
 //GET ATTACHMENTS
 //getAttatchments
 function getAttachments(req, res) {
@@ -173,7 +228,7 @@ function getAttachments(req, res) {
     if (req.query.id) {
         var id = req.query.id;
         getAttachmentsFromDb(id, function (error, result) {
-            if (error || result == null) {
+            if (error || result == null || result.length == 0) {
                 res.status(500).json({ data: error });
             }
             else {
@@ -184,7 +239,7 @@ function getAttachments(req, res) {
     }
     else {
         console.log("incorrect query");
-        res.json({query: req.query});
+        res.json({ query: req.query });
     }
 }
 //Pool:getAttachments
@@ -214,7 +269,7 @@ function getAttachmentsFromDb(id, callback) {
 }
 //---------------------------------------------------------------------------------------------------
 
-//LocalHost Listening
+//LocalHost Listening 5000
 app.listen(app.get("port"), function () {
     console.log("Listening on port:" + app.get("port"));
 });
