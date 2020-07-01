@@ -20,6 +20,7 @@ app.get("/getUser", getUser);
 app.get("/getBlog", getBlogs);
 app.get("/getAffiliates", getAffiliates);
 app.get("/getAttachments", getAttachments);
+app.post('/addComment', () => console.log('Backend: received post'));
 //--------------------------------ROUTES
 
 //CODE----------------------------------------------------------------------------------------------------------------------------------------------

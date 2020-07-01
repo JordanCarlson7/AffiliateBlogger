@@ -4,7 +4,10 @@
 <head>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
         integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-</head>
+    <link rel="stylesheet" type="text/css" href="/stylesheets/static.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="/javascripts/jsStatic.js" type="module"></script>
+    </head>
 
 <body>
     <!---NAV-->
@@ -29,10 +32,12 @@
             <form action="#" method="POST">
                 <fieldset>
                     <legend>Comments</legend>
-                    <label for="commentInput">Comment:</label>
-                    <textarea name="commentInput" placeholder="I really like..."></textarea>
                     <label for="commentName">Name:</label>
-                    <input type="text" name="commentName" value="" placeholder="Name">
+                    <input type="text" name="commentName" id="commentName" value="" placeholder="Name">
+                    <br>
+                    <label for="commentInput">Comment:</label>
+                    <textarea name="commentInput" id="commentInput" placeholder="I really like..."></textarea>            
+                    <button id="addComment">Submit</button>
                 </fieldset>
             </form>
 

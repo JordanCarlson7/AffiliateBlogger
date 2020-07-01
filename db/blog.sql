@@ -15,6 +15,14 @@ CREATE TABLE blogs (
     date Date,
     content text
 );
+--Comments
+CREATE TABLE comments (
+    id SERIAL,
+    blog_id int REFERENCES blogs(id),
+    author varchar(255),
+    content text,
+    date Date
+);
 --Affiliates
 CREATE TABLE affiliates (
     user_id int REFERENCES users(id),
