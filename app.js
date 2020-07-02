@@ -3,11 +3,14 @@ const { Pool } = require('pg')
 var express = require('express');
 var path = require('path');
 const { response } = require('express');
+const { nextTick } = require('process');
 var app = new express();
 const connectionString = process.env.DATABASE_URL || "postgress://localtester:localpassword@localhost:5432/affiliate_blogger";
 const pool = new Pool({ connectionString: connectionString });
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
+app.use(express.json());
+app.use(express.urlencoded({extended: true}));
 app.use(express.static(path.join(__dirname, 'public')));
 app.set("port", (process.env.PORT || 5000));
 //----------------------------------SETUP
@@ -20,11 +23,11 @@ app.get("/getUser", getUser);
 app.get("/getBlog", getBlogs);
 app.get("/getAffiliates", getAffiliates);
 app.get("/getAttachments", getAttachments);
-app.post('/addComment', () => console.log('Backend: received post'));
+app.use('/visitor', addComment);
 //--------------------------------ROUTES
 
 //CODE----------------------------------------------------------------------------------------------------------------------------------------------
-
+//GETS--------------------------------------
 //SHOWING A VISITOR A BLOG
 function showVisitorBlog(req, res) {
     //var author = 'nothing';
@@ -45,6 +48,7 @@ function showVisitorBlog(req, res) {
                 content: content
             }
             res.render("homePage.ejs", params);
+            res.end();
         }
     })
 }
@@ -269,7 +273,45 @@ function getAttachmentsFromDb(id, callback) {
     }
 }
 //---------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------GETS
+//POST------------------------------------------------------------------------
+function addComment(req, res) {
+    var comment = req.body.commentName;
+    var name = req.body.commentInput;
+    console.log(comment, name);
+    console.log('Backend: received post from', req.url);
+    console.log('data:', req.body)
+    if (req.body != {}) {
+        addCommentToDb(name, comment, function(err, result) {
+            if (err) {
+                console.log("error in posting to db", err)
+            }
+            else {
+                console.log("result of posting to db", result);
+            }
+        });
+    }
 
+    res.status(204).send();
+
+}
+function addCommentToDb(name, comment, callback){
+    date = new Date();
+    var sql = "INSERT INTO comments (blog_id, author, content, date) VALUES (1, $1::varchar, $2::text, $3::Date)";
+    var params = [name, comment, date];
+
+    pool.query(sql, params, function(err, result) {
+        if (err) {
+            console.log("error in db:", err);
+            callback(err, null);
+        }
+        else {
+            console.log("db response:", JSON.stringify(result.rows))
+            callback(null, result.rows);
+        }
+    })
+}
+//-------------------------------------------------------------------POST
 //LocalHost Listening 5000
 app.listen(app.get("port"), function () {
     console.log("Listening on port:" + app.get("port"));
