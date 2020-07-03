@@ -6,19 +6,19 @@
         integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" href="/stylesheets/static.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <script src="/javascripts/jsStatic.js" type="module"></script>
-    </head>
+    <script src="javascripts/jsStatic.js" type="module"></script>
+</head>
 
 <body>
     <!---NAV-->
     <ul class="nav nav-tabs">
         <li class="nav-item">
-          <button class="nav-link active" onclick="goHome()">Home</button>
+            <button class="nav-link active">Home</button>
         </li>
         <li class="nav-item">
-            <button class="nav-link" onclick="findUserBlog()">Blog</button>
+            <button class="nav-link">Blog</button>
         </li>
-      </ul>
+    </ul>
     <!---NAV-->
 
     <div id="feed" class="container">
@@ -28,21 +28,40 @@
             <h3><%= subject %> : <%= date %></h3>
         </div>
         <div id="content"><%= content %></div>
-        <div id="comment">
-            <form action="#" method="POST">
-                <fieldset>
-                    <legend>Comments</legend>
-                    <label for="commentName">Name:</label>
-                    <input type="text" name="commentName" id="commentName" value="" placeholder="Name">
-                    <br>
-                    <label for="commentInput">Comment:</label>
-                    <textarea name="commentInput" id="commentInput" placeholder="I really like..."></textarea>            
-                    <button id="addComment">Submit</button>
-                </fieldset>
-            </form>
-
+        <div id="comments">
+            <div id="currentComments">
+                <ul>
+                    <% commentsArray.forEach(function (comment) { %>
+                    <li>
+                        <div class="comment">
+                            <h1><%= comment.author %></h1>
+                            <h2><%= comment.date %></h2>
+                            <p><%= comment.content %></p>
+                            <button class="deleteComment">Delete</button>
+                        </div>
+                    </li>
+                    <% }) %>
+                </ul>
+            </div>
+            <div id="newComment">
+                <form action="#" method="POST">
+                    <fieldset>
+                        <legend>Comments</legend>
+                        <label for="commentName">Name:</label>
+                        <input type="text" name="commentName" id="commentName" value="" placeholder="Name">
+                        <br>
+                        <label for="commentInput">Comment:</label>
+                        <textarea name="commentInput" id="commentInput" placeholder="I really like..."></textarea>
+                        <button type="button" id="addComment">Submit</button>
+                    </fieldset>
+                </form>
+            </div>
         </div>
     </div>
+    <script>
+        //import start from 'javascripts/jsStatic.js';
+        //start();
+    </script>
 </body>
 
 </html>

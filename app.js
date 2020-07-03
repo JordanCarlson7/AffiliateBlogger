@@ -9,6 +9,12 @@ const connectionString = process.env.DATABASE_URL || "postgress://localtester:lo
 const pool = new Pool({ connectionString: connectionString });
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
+app.use(function(req, res, next) {
+    res.header("Access-Control-Allow-Origin", "http://localhost:5000/visitor"); // update to match the domain you will make the request from
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next();
+  });
+  
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 app.use(express.static(path.join(__dirname, 'public')));
@@ -23,7 +29,7 @@ app.get("/getUser", getUser);
 app.get("/getBlog", getBlogs);
 app.get("/getAffiliates", getAffiliates);
 app.get("/getAttachments", getAttachments);
-app.use('/visitor', addComment);
+app.use('/addComment', addComment);
 //--------------------------------ROUTES
 
 //CODE----------------------------------------------------------------------------------------------------------------------------------------------
@@ -31,12 +37,14 @@ app.use('/visitor', addComment);
 //SHOWING A VISITOR A BLOG
 function showVisitorBlog(req, res) {
     //var author = 'nothing';
-
-    getBlogsJoinUsersFromDb(1, function (err, result) {
+    
+    getBlogsJoinUsersFromDb(1, async function (err, result) {
+        
         if (err) {
             console.log("getBlogs From ERR", err);
         }
         else {
+            
             //console.log("RESULT WAS", result);
             var content = result[0].content;
 
@@ -47,16 +55,45 @@ function showVisitorBlog(req, res) {
                 date: result[0].date,
                 content: content
             }
-            res.render("homePage.ejs", params);
-            res.end();
+            //console.log("This is what we got", params)
+            getComments(1, res, params);
+            //res.render("homePage.ejs", params);
+            //res.end();
         }
     })
 }
+
+//
+async function getComments(id, res, blogParams) {
+    console.log("trying to get comments");
+    var sql = "SELECT author, content, date FROM comments WHERE comments.blog_id = $1::int";
+    params = [id];
+    pool.query(sql, params, function(err, result) {
+        if (err || result == 'undefined') {
+            console.log("error in DB");
+            console.log(err);
+            return null;
+        }
+        else {
+            //console.log("DB Result" + JSON.stringify(result.rows));
+            commentArray = result.rows;
+            //console.log("all the parameters", blogParams);
+            blogParams.commentsArray = commentArray;
+            console.log(blogParams.commentsArray[0])
+           // console.log(blogParams.commentsArray)
+            res.render("homePage.ejs", blogParams);
+            res.end();
+            
+        }
+    }) 
+}
+//
 //Pool:getBlogsJoinUsers
 function getBlogsJoinUsersFromDb(id, callback) {
 
     console.log("getBlogsJOINUsersFromDb with id:", id);
     var sql = "SELECT user_name, title, subject, date, content FROM blogs JOIN users on blogs.user_id = $1::int AND users.id = $1::int";
+    //?havent tried var sql ="SELECT user_name, title, subject, date, content, author, content, date FROM blogs JOIN users on blogs.user_id = $1::int AND users.id = $1::int JOIN comments ON comments.blog_id = blogs.id"
     var params = [id];
 
     try {
@@ -67,7 +104,7 @@ function getBlogsJoinUsersFromDb(id, callback) {
                 callback(err, null);
             }
             else {
-                console.log("DB Result" + JSON.stringify(result.rows));
+                //console.log("DB Result" + JSON.stringify(result.rows));
                 callback(null, result.rows);
             }
         })
@@ -291,8 +328,8 @@ function addComment(req, res) {
             }
         });
     }
-
-    res.status(204).send();
+    res.header('content-type', 'application/json');
+    res.status(200).send(JSON.stringify({'response': 'success'}));
 
 }
 function addCommentToDb(name, comment, callback){

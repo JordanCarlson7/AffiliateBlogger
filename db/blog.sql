@@ -63,3 +63,9 @@ INSERT INTO attachments (blog_id, file_path) VALUES ('1', '../attachments/test_a
 --GETTING--
 --author and blog
 SELECT * FROM blogs JOIN users ON blogs.user_id = users.id;
+
+--triple join: blogs, users, comments
+SELECT * FROM blogs JOIN users ON blogs.user_id = users.id JOIN comments on blogs.id = comments.blog_id;
+
+--comments
+SELECT author, content, date FROM comments WHERE comments.blog_id = //desired blog_id;
