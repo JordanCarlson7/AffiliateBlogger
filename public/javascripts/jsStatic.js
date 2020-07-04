@@ -36,7 +36,7 @@ function addComment() {
     commentContent: document.getElementById('commentInput').value
   }
 
-  postData(process.env.NODE_ENV || 'http://localhost:5000/addComment', params)
+  postData(window.location.origin + '/addComment', params)
     .then(data => {
       console.log(data); // JSON data parsed by `data.json()` call
     })
