@@ -55,6 +55,7 @@ function addCommentToPage (params) {
   let content = params.commentContent;
   var list = document.getElementById('commentList');
 
+  let li = document.createElement('li');
   let div = document.createElement('div');
   div.setAttribute('class', 'comment');
   let h1 = document.createElement('h1');
@@ -71,7 +72,8 @@ function addCommentToPage (params) {
   div.appendChild(h2);
   div.appendChild(p);
   div.appendChild(button);
-  list.lastChild.after(div);
+  li.appendChild(div);
+  list.lastChild.after(li);
   
 }
 // Example POST method implementation:
