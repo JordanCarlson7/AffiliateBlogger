@@ -313,9 +313,10 @@ function getAttachmentsFromDb(id, callback) {
 //-------------------------------------------------------------------GETS
 //POST------------------------------------------------------------------------
 function addComment(req, res) {
-    var comment = req.body.commentName;
-    var name = req.body.commentInput;
-    console.log(comment, name);
+    console.log("request:", req.body)
+    var name = req.body.commentName;
+    var comment = req.body.commentContent;
+    console.log(name, comment);
     console.log('Backend: received post from', req.url);
     console.log('data:', req.body)
     if (req.body != {}) {

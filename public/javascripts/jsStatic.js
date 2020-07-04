@@ -41,9 +41,35 @@ function addComment() {
       console.log(data); // JSON data parsed by `data.json()` call
     })
     .catch(err => console.log('Frontend Error POST Comment', err));
-  
+  addCommentToPage(params);
 }
 
+function addCommentToPage (params) {
+  console.log("adding comment to page")
+  let date = new Date();
+  let name = params.commentName;
+  let content = params.commentContent;
+  var list = document.getElementById('commentList');
+
+  let div = document.createElement('div');
+  div.setAttribute('class', 'comment');
+  let h1 = document.createElement('h1');
+  h1.innerText = name;
+  let h2 = document.createElement('h2');
+  h2.innerText = date;
+  let p = document.createElement('p');
+  p.innerText = content;
+  let button = document.createElement('button');
+  button.setAttribute('class', 'deleteComment');
+  button.innerText = 'Delete';
+  button.addEventListener('click',deleteComment, true);
+  div.appendChild(h1);
+  div.appendChild(h2);
+  div.appendChild(p);
+  div.appendChild(button);
+  list.lastChild.after(div);
+  
+}
 // Example POST method implementation:
 async function postData(url = '', data = {}) {
   // Default options are marked with *
