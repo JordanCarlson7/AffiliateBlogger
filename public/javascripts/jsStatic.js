@@ -14,20 +14,23 @@ export default function start() {
 $(document).ready((start()));
 
 function deleteComment() {
-  console.log(this);
-  this.parentNode.parentNode.parentNode.removeChild(this.parentNode.parentNode);
+  console.log("this",this);
   var that = this;
+  console.log('that', that);
+  this.parentNode.parentNode.parentNode.removeChild(this.parentNode.parentNode);
+  console.log('this', this, 'that', that);
+  
+  //Getting data from local comment
   var params = {
-    commentName: that.previousSibling.previousSibling.previousSibling.value,
-    commentContent: this.value
+    commentName: that.previousSibling.previousSibling.previousSibling.previousSibling.previousSibling.previousSibling.innerText,
+    commentContent: that.previousSibling.previousSibling.innerText
   }
-  console.log(params);/*
-  postData('http://localhost:5000/deleteComment', params)
+  console.log("deleting comment:",params);
+  postData(window.location.origin + '/deleteComment', params)
   .then(data => {
     console.log(data); // JSON data parsed by `data.json()` call
   })
   .catch(err => console.log('Frontend Error POST Comment', err));
-*/
 }
 
 function addComment() {
@@ -35,6 +38,7 @@ function addComment() {
     commentName: document.getElementById('commentName').value,
     commentContent: document.getElementById('commentInput').value
   }
+  //Do Validation here
 
   postData(window.location.origin + '/addComment', params)
     .then(data => {

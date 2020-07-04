@@ -41,6 +41,7 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON users, blogs, affiliates, attachments TO
 GRANT USAGE, SELECT ON SEQUENCE users_id_seq, blogs_id_seq TO localTester;
 
 --TESTING--
+--Inserts
 --Insert Users
 INSERT INTO users (user_name, password, email, url_extension) VALUES ('test_user', 'test_password', 'test@email.com', 'test/route/extension');
 --Insert Blogs
@@ -69,3 +70,6 @@ SELECT * FROM blogs JOIN users ON blogs.user_id = users.id JOIN comments on blog
 
 --comments
 SELECT author, content, date FROM comments WHERE comments.blog_id = //desired blog_id;
+
+--DELETING
+DELETE from comments WHERE comments.content = 'l';//desired comment;

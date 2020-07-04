@@ -9,27 +9,28 @@ const connectionString = process.env.DATABASE_URL || "postgress://localtester:lo
 const pool = new Pool({ connectionString: connectionString });
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
     res.header("Access-Control-Allow-Origin", "http://localhost:5000/visitor"); // update to match the domain you will make the request from
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
     next();
-  });
-  
+});
+
 app.use(express.json());
-app.use(express.urlencoded({extended: true}));
+app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 app.set("port", (process.env.PORT || 5000));
 //----------------------------------SETUP
 //ROUTES---------------------------------
 app.get("/", function (req, res) {
-    res.sendFile('public/html/welcomeStatic.html', {root: __dirname});
+    res.sendFile('public/html/welcomeStatic.html', { root: __dirname });
 })
 app.get("/visitor", showVisitorBlog);
 app.get("/getUser", getUser);
 app.get("/getBlog", getBlogs);
 app.get("/getAffiliates", getAffiliates);
 app.get("/getAttachments", getAttachments);
-app.use('/addComment', addComment);
+app.post('/addComment', addComment);
+app.post('/deleteComment', deleteComment);
 //--------------------------------ROUTES
 
 //CODE----------------------------------------------------------------------------------------------------------------------------------------------
@@ -37,14 +38,14 @@ app.use('/addComment', addComment);
 //SHOWING A VISITOR A BLOG
 function showVisitorBlog(req, res) {
     //var author = 'nothing';
-    
+
     getBlogsJoinUsersFromDb(1, async function (err, result) {
-        
+
         if (err) {
             console.log("getBlogs From ERR", err);
         }
         else {
-            
+
             //console.log("RESULT WAS", result);
             var content = result[0].content;
 
@@ -68,7 +69,7 @@ async function getComments(id, res, blogParams) {
     console.log("trying to get comments");
     var sql = "SELECT author, content, date FROM comments WHERE comments.blog_id = $1::int";
     params = [id];
-    pool.query(sql, params, function(err, result) {
+    pool.query(sql, params, function (err, result) {
         if (err || result == 'undefined') {
             console.log("error in DB");
             console.log(err);
@@ -80,12 +81,12 @@ async function getComments(id, res, blogParams) {
             //console.log("all the parameters", blogParams);
             blogParams.commentsArray = commentArray;
             console.log(blogParams.commentsArray[0])
-           // console.log(blogParams.commentsArray)
+            // console.log(blogParams.commentsArray)
             res.render("homePage.ejs", blogParams);
             res.end();
-            
+
         }
-    }) 
+    })
 }
 //
 //Pool:getBlogsJoinUsers
@@ -312,6 +313,48 @@ function getAttachmentsFromDb(id, callback) {
 //---------------------------------------------------------------------------------------------------
 //-------------------------------------------------------------------GETS
 //POST------------------------------------------------------------------------
+function deleteComment(req, res) {
+    console.log("request:", req.body)
+    var name = req.body.commentName;
+    var comment = req.body.commentContent;
+    console.log(name, comment);
+    console.log('Backend: received post from', req.url);
+    console.log('data:', req.body)
+    if (req.body != {}) {
+        deleteCommentFromDb(name, comment, function (err, result) {
+            if (err) {
+                console.log("error in posting to db", err)
+
+                res.header('content-type', 'application/json');
+                res.status(200).send(JSON.stringify({ 'response': err }));
+            }
+            else {
+                console.log("result of posting to db", result);
+                res.header('content-type', 'application/json');
+                res.status(200).send(JSON.stringify({ 'response': 'success' }));
+            }
+        });
+    }
+
+}
+//Should have stored id_seq of comment in a data tag and used that for deletion condition
+function deleteCommentFromDb(name, comment, callback) {
+    var sql = "DELETE from comments WHERE comments.content = $1::text";
+    var params = [comment];
+
+    pool.query(sql, params, function (err, result) {
+        if (err) {
+            console.log("error in db:", err);
+            callback(err, null);
+        }
+        else {
+            console.log("db response:", JSON.stringify(result.rows))
+            callback(null, result.rows);
+        }
+    })
+}
+
+
 function addComment(req, res) {
     console.log("request:", req.body)
     var name = req.body.commentName;
@@ -320,25 +363,28 @@ function addComment(req, res) {
     console.log('Backend: received post from', req.url);
     console.log('data:', req.body)
     if (req.body != {}) {
-        addCommentToDb(name, comment, function(err, result) {
+        addCommentToDb(name, comment, function (err, result) {
             if (err) {
                 console.log("error in posting to db", err)
+                res.header('content-type', 'application/json');
+                res.status(200).send(JSON.stringify({ 'response': err }));
             }
             else {
                 console.log("result of posting to db", result);
+                res.header('content-type', 'application/json');
+                res.status(200).send(JSON.stringify({ 'response': 'success' }));
             }
         });
     }
-    res.header('content-type', 'application/json');
-    res.status(200).send(JSON.stringify({'response': 'success'}));
+
 
 }
-function addCommentToDb(name, comment, callback){
+function addCommentToDb(name, comment, callback) {
     date = new Date();
     var sql = "INSERT INTO comments (blog_id, author, content, date) VALUES (1, $1::varchar, $2::text, $3::Date)";
     var params = [name, comment, date];
 
-    pool.query(sql, params, function(err, result) {
+    pool.query(sql, params, function (err, result) {
         if (err) {
             console.log("error in db:", err);
             callback(err, null);
