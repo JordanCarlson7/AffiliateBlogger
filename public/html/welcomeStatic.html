@@ -1,10 +1,33 @@
 <!DOCTYPE html>
 <html>
-    <head></head>
+    <head>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+            integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+            <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+            <script src="/javascripts/logIn.js"></script>
+    </head>
+    
     <body>
+        <!---NAV-->
+        <ul class="nav nav-tabs">
+            <li class="nav-item">
+              <a class="nav-link active" href="/">Home</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link active" href="/visitor">Blog</a>
+              </li>
+          </ul>
+        <!---NAV-->
         <div id="user">
-            <a href="/owner">Blog Owner</a><br>
-            <a href="/visitor">Visitor</a>
+            <label for="username">Username:</label>
+            <input type="text" name="username" id="username">
+            <label for="password">Password:</label>
+            <input type="text" name="password" id="password">
+            <label for="email">Email:</label>
+            <input type="text" name="email" id="email">
+            <button type="button" onclick="login()">Login</button>
+            <button type="button" onclick="newUser()">Create New User</button>
+            <br>
         </div>
     </body>
 </html>

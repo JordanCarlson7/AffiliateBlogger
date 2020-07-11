@@ -1,4 +1,3 @@
-
 export default function start() {
   var button = document.getElementById('addComment');
   button.addEventListener('click', addComment, true);
@@ -64,16 +63,21 @@ function addCommentToPage (params) {
   h2.innerText = date;
   let p = document.createElement('p');
   p.innerText = content;
-  let button = document.createElement('button');
+  var button = document.createElement('button');
   button.setAttribute('class', 'deleteComment');
+  
+  /*BUTTON LISTENER IS NOT WORKING */
+  button.addEventListener('click', function() {deleteComment()}, false);
+  button.addEventListener('click',deleteComment, false);
+
   button.innerText = 'Delete';
-  button.addEventListener('click',deleteComment, true);
   div.appendChild(h1);
   div.appendChild(h2);
   div.appendChild(p);
   div.appendChild(button);
   li.appendChild(div);
   list.lastChild.after(li);
+  
   
 }
 // Example POST method implementation:

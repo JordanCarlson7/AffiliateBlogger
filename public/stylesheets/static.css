@@ -1,6 +1,9 @@
 button {
     background-color: red;
 }
+legend {
+    width: auto;
+}
 fieldset{
 
     border: solid 2px red;
