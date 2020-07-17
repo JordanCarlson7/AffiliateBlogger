@@ -5,6 +5,7 @@
             integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
             <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
             <script src="/javascripts/logIn.js"></script>
+            <link rel="stylesheet" type="text/css" href="/stylesheets/static.css">
     </head>
     
     <body>
@@ -13,21 +14,21 @@
             <li class="nav-item">
               <a class="nav-link active" href="/">Home</a>
             </li>
-            <li class="nav-item">
-                <a class="nav-link active" href="/visitor">Blog</a>
-              </li>
           </ul>
         <!---NAV-->
         <div id="user">
             <label for="username">Username:</label>
-            <input type="text" name="username" id="username">
+            <input type="text" name="username" id="username" placeholder="required ('me')">
             <label for="password">Password:</label>
-            <input type="text" name="password" id="password">
+            <input type="text" name="password" id="password" placeholder="required ('mypassword')">
             <label for="email">Email:</label>
-            <input type="text" name="email" id="email">
+            <input type="text" name="email" id="email" placeholder="not required">
             <button type="button" onclick="login()">Login</button>
             <button type="button" onclick="newUser()">Create New User</button>
             <br>
+            
+        <a  style="text-align: right; padding: 0px;"class="nav-link active" href="/visitor">Continue as Visitor</a>
         </div>
+        <footer>Copyright: Jordan Carlson</footer>
     </body>
 </html>

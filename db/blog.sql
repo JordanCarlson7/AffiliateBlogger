@@ -21,7 +21,7 @@ CREATE TABLE comments (
     blog_id int REFERENCES blogs(id),
     author varchar(255),
     content text,
-    date Date
+    date varchar(255)
 );
 --Affiliates
 CREATE TABLE affiliates (

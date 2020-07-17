@@ -3,20 +3,25 @@ const { Pool } = require('pg')
 var express = require('express');
 var path = require('path');
 const bcrypt = require('bcrypt');
+var url = require('url');
 
 var app = new express();
 const connectionString = process.env.DATABASE_URL || "postgress://localtester:localpassword@localhost:5432/affiliate_blogger";
 const pool = new Pool({ connectionString: connectionString });
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
+//cross origin request issues
 app.use(function (req, res, next) {
-    res.header("Access-Control-Allow-Origin", "http://localhost:5000/visitor"); 
+    res.header("Access-Control-Allow-Origin", "http://localhost:5000/visitor");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
     next();
 });
 //---Globals--//
 var currentBlogId = 0;
 var blogsArray = [];
+var loggedIn = false;
+var currentUser = 'visitor';
+var currentUserId = 0;
 //---Globals--//
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -29,13 +34,14 @@ app.get("/", function (req, res) {
     res.sendFile('public/html/welcomeStatic.html', { root: __dirname });
     getBlogs();
 })
-app.get("/visitor", showVisitorBlog);
+app.get("/visitor", showBlog);
 app.get("/getUser", getUser);
 app.get("/getBlog", getBlogs);
 app.get("/getAffiliates", getAffiliates);
 app.get("/getAttachments", getAttachments);
 app.post('/addComment', addComment);
 app.post('/deleteComment', deleteComment);
+app.post('/addBlog', addBlog);
 app.post('/newUser', addUser);
 app.post('/login', login);
 //app.post('/login', )
@@ -44,38 +50,67 @@ app.post('/login', login);
 //CODE----------------------------------------------------------------------------------------------------------------------------------------------
 //GETS--------------------------------------
 //SHOWING A VISITOR A BLOG
-function showVisitorBlog(req, res) {
+function showBlog(req, res) {
+    getBlogs();
     //var author = 'nothing';
     console.log("query", req.query);
-    var user_id = req.query.id || 1; 
-    getBlogsJoinUsersFromDb(user_id, async function (err, result) {
+    var blog_id = req.query.id || null;
+    try {
+        getBlogsJoinUsersFromDb(blog_id, function (err, result) {
 
-        if (err) {
-            console.log("getBlogs From ERR", err);
-        }
-        else {
-
-            //console.log("RESULT WAS", result);
-            var content = result[0].content;
-            console.log("result", result);
-            var params = {
-                author: result[0].user_name,
-                title: result[0].title,
-                subject: result[0].subject,
-                date: result[0].date,
-                content: content,
-                blogs: blogsArray
+            if (err) {
+                console.log("getBlogs From ERR", err);
             }
-            //console.log("This is what we got", params)
-            getComments(result[0].id, res, params);
-            //res.render("homePage.ejs", params);
-            //res.end();
-        }
-    })
+            else {
+                //console.log("RESULT WAS", result);
+                if (result.length != 0) {
+                    var content = result[0].content;
+                    console.log("result", result);
+                    var params = {
+                        author: result[0].user_name,
+                        title: result[0].title,
+                        subject: result[0].subject,
+                        date: result[0].date.toDateString(),
+                        content: content,
+                        blogs: blogsArray,
+                        loggedIn: loggedIn,
+                        comments: true,
+                        username: currentUser
+                    }
+                    
+                getComments(result[0].id, res, params);
+                } else {
+                    var content = 'Welcome to you first blog!, go "Home" to login and press the + symbol in the nav bar to create your first post';
+                    console.log("result", result);
+                    var params = {
+                        author: 'This is where your name will go',
+                        title: 'This is the title of your post!',
+                        subject: 'If you have a subject topic is goes here!',
+                        date: 'Date of publish will show here',
+                        content: content,
+                        blogs: blogsArray,
+                        loggedIn: loggedIn,
+                        comments: false,
+                        username: currentUser
+                        
+                    }
+                    res.render('homePage.ejs', params);
+                }
+
+                //console.log("This is what we got", params)
+                //res.render("homePage.ejs", params);
+                //res.end();
+            }
+        })
+    }
+    catch (err) {
+        console.log(err);
+        res.status(204).send({ success: false });
+    }
 }
 
 //
-async function getComments(id, res, blogParams) {
+function getComments(id, res, blogParams) {
     console.log("trying to get comments");
     var sql = "SELECT author, content, date FROM comments WHERE comments.blog_id = $1::int";
     params = [id];
@@ -103,7 +138,8 @@ async function getComments(id, res, blogParams) {
 function getBlogsJoinUsersFromDb(id, callback) {
     console.log("previous current blog", currentBlogId);
     currentBlogId = id;
-    console.log("getBlogsJOINUsersFromDb with id:", id);
+    console.log("getBlogsJOINUsersFromDb with id:", id); //Needs to be done by blog id not user id
+    //var sql = "SELECT blogs.id, blogs.title, blogs.subject, blogs.date, blogs.content, users.user_name FROM blogs JOIN users ON blogs.user_id = users.id";
     var sql = "SELECT blogs.id, blogs.title, blogs.subject, blogs.date, blogs.content, users.user_name FROM blogs JOIN users ON blogs.id = $1::int AND blogs.user_id = users.id";
     //?havent tried var sql ="SELECT user_name, title, subject, date, content, author, content, date FROM blogs JOIN users on blogs.user_id = $1::int AND users.id = $1::int JOIN comments ON comments.blog_id = blogs.id"
     var params = [id];
@@ -116,7 +152,7 @@ function getBlogsJoinUsersFromDb(id, callback) {
                 callback(err, null);
             }
             else {
-                //console.log("DB Result" + JSON.stringify(result.rows));
+                console.log("DB Result" + JSON.stringify(result.rows));
                 callback(null, result.rows);
             }
         })
@@ -181,20 +217,20 @@ function getPersonFromDb(id, callback) {
 function getBlogs() {
     console.log("Connected to GET BLOG");
 
-        getBlogsFromDb(function (error, result) {
-            if (error || result == null || result.length == 0) {
-               
-            }
-            else {
-                console.log("back from data base with result", result);
-            }
-        });
+    getBlogsFromDb(function (error, result) {
+        if (error || result == null || result.length == 0) {
+
+        }
+        else {
+            console.log("back from data base with result", result);
+        }
+    });
 }
 //Pool:getBlogs
 function getBlogsFromDb(callback) {
 
     console.log("getBlogsFromDb");
-    var sql = "SELECT user_id, title FROM blogs";
+    var sql = "SELECT id, user_id, title, content FROM blogs";
     //var sql = "SELECT user_id, title FROM blogs WHERE id = $1::int";
     //var params = [id];
 
@@ -318,6 +354,31 @@ function getAttachmentsFromDb(id, callback) {
 //---------------------------------------------------------------------------------------------------
 //-------------------------------------------------------------------GETS
 //POST------------------------------------------------------------------------
+function addBlog(req, res) {
+    console.log("Back recieved params", req.body, "from Front");
+    addBlogToDB(req.body, function (err, result) {
+        if (err) {
+            console.log('error adding blog to db', err);
+            res.status(204).send(JSON.stringify({addedBlog: false}))
+        } else {
+            console.log('successfully added blog to db');
+            res.status(204).send(JSON.stringify({addedBlog: true}))
+        }
+    });
+
+}
+function addBlogToDB(body, callback) {
+    var sql = 'INSERT INTO blogs (user_id, title, subject, date, content) VALUES ($1::int, $2::varchar, $3::varchar, $4::date, $5::text)';
+    var params = [currentUserId, body.title, body.subject, new Date(), body.content];
+    pool.query(sql,params, function(err, result) {
+        if (err) {
+            callback(err, null);
+        } else {
+            console.log("successfully added blog within DB", result);
+        }  
+    })
+}
+
 function deleteComment(req, res) {
     console.log("request:", req.body)
     var name = req.body.commentName;
@@ -358,8 +419,6 @@ function deleteCommentFromDb(name, comment, callback) {
         }
     })
 }
-
-
 function addComment(req, res) {
     console.log("request:", req.body)
     var name = req.body.commentName;
@@ -385,8 +444,8 @@ function addComment(req, res) {
 
 }
 function addCommentToDb(name, comment, callback) {
-    date = new Date();
-    var sql = "INSERT INTO comments (blog_id, author, content, date) VALUES ($1::int, $2::varchar, $3::text, $4::Date)";
+    date = new Date().toDateString();
+    var sql = "INSERT INTO comments (blog_id, author, content, date) VALUES ($1::int, $2::varchar, $3::text, $4::varchar)";
     var params = [currentBlogId, name, comment, date];
 
     pool.query(sql, params, function (err, result) {
@@ -444,9 +503,6 @@ function addUser(req, res) {
         console.log("promise error", err)
     }
 
-
-
-
 }
 function addUserToDb(data, callback) {
     console.log('data', data)
@@ -465,11 +521,69 @@ function addUserToDb(data, callback) {
 }
 //-------------------------------------------------------------------Adding user
 //LOGIN---------------------------------------------------------------------
-function login(req, res) {
-    
-}
-function validateLogin(params, callback) {
+async function login(req, res) {
+    if (req.body.username && req.body.password) {
+        try {
+            console.log("requesting to login with user", req.body.username, "email", req.body.email);
+            await validateLogin(req.body.username, async function (err, result) {
 
+                res.header('content-type', 'application/json');
+                if (err) {
+                    console.log(err);
+                    res.status(400).send({ password: 'not found' });
+                }
+                else {
+                    currentUserId = result.id;
+                    req.query.id = result.id;
+                    await bcrypt.compare(req.body.password, result.password, function (err, result) {
+                        if (err || !result) {
+                            console.log("bcrypt compare failed", err)
+                            loggedIn = false;
+                            currentUser = null;
+                            res.status(204).send({ password: loggedIn })
+                        }
+                        else if (result) {
+                            console.log("bcrypt compare succeeded")
+                            loggedIn = true;
+                            currentUser = req.body.username;
+                            console.log('password verify result', result);
+
+                            //showBlog(req,res);
+                            //  res.header('content-type', 'text/html')\
+                            /*
+                            res.writeHead(302, { Location: 'https://localhost:5000/visitor/?id=1' });
+                            console.log('https://localhost:5000/visitor/?id=1')
+                            res.send();*/
+                            res.status(200).send(JSON.stringify({ password: loggedIn }));
+                        }
+                    });
+                    //res.writeHead({Location: 'https://localhost:5000/visitor/?id=1'});
+                }
+            })
+        }
+        catch (err) {
+            console.log(err);
+        }
+    }
+    else {
+        res.status(204);
+    }
+}
+
+function validateLogin(user, callback) {
+
+    var sql = "SELECT id, password FROM users WHERE user_name = $1::varchar";
+    var params = [user];
+
+    pool.query(sql, params, function (err, result) {
+        if (err) {
+            callback(err, null);
+        }
+        else {
+            console.log("hash", result.rows[0]);
+            callback(null, result.rows[0]);
+        }
+    })
 }
 //-------------------------------------------------------------------LOGIN
 

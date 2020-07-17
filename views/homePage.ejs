@@ -13,47 +13,65 @@
     <!---NAV-->
     <ul class="nav nav-tabs">
         <li class="nav-item">
-            <a class="nav-link" href="/">Log in</a>
+            <a class="nav-link" id="homeNav" href="/">Home</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="/">Home</a>
-        </li>
-        <li class="nav-item">
-            <button class="nav-link active">Blog</button>
+            <a class="nav-link" href="#">      </a>
         </li>
         <% blogs.forEach(function (blog) { %>
             <li class="nav-item">
-                <a class="nav-link active" href=/visitor/?id=<%=blog.user_id %>  ><%= blog.title %></a>
+                <a class="nav-link" href=/visitor/?id=<%=blog.id %>  ><%= blog.title %></a>
             </li>
             <% }) %>
-    </ul>
+            <% if (loggedIn) { %>
+                <li class="nav-item">
+                    <button class="nav-link" id="newBlogButton">+</a>
+                </li>
+            <% } %>
+        </ul>
     <!---NAV-->
-
     <div id="feed" class="container">
+        <div id="newBlog" style="display: none;">
+            <form action="#" id="newBlogForm">
+                <fieldset>
+                    <legend>New Blog</legend>
+                    <label for="newTitle">Title</label>
+                    <input type="text" name="newTitle" id="newTitle" value="" placeholder="Title">
+                    <label for="newSubject">Subject</label>
+                    <input type="text" name="newSubject" id="newSubject" value="" placeholder="Subject">
+                    <br>
+                    <label for="newBlogContent">Blog:</label>
+                    <textarea name="newBlogContent" id="newBlogContent" placeholder="Today i would like to speak about..."></textarea>
+                    <button type="button" id="addBlog">Submit</button>
+                </fieldset>
+            </form>
+        </div>
+        <div id="mainBlog" class="container">
         <div id="contentHeader" class="container">
+            <h1><%= title %></h1>
             <h2><%= author %></h2>
-            <h3></h3>
             <h3><%= subject %> : <%= date %></h3>
         </div>
         <div id="content"><%= content %></div>
+    </div>
         <div id="comments">
             <div id="currentComments">
                 <ul id="commentList">
-                    <% commentsArray.forEach(function (comment) { %>
+                    <% if (comments) { commentsArray.forEach(function (comment) { %>
                     <li>
                         <div class="comment">
-                            <h1><%= comment.author %></h1>
-                            <h2><%= comment.date %></h2>
+                            <h3><%= comment.author %></h3>
+                            <h4><%= comment.date %></h4>
                             <p><%= comment.content %></p>
                             <button class="deleteComment">Delete</button>
                         </div>
                     </li>
-                    <% }) %>
+                    <% })} %>
                 </ul>
             </div>
             <div id="newComment">
                 <form action="#" method="POST">
-                    <fieldset>
+                    <fieldset class="container">
                         <legend>Comments</legend>
                         <label for="commentName">Name:</label>
                         <input type="text" name="commentName" id="commentName" value="" placeholder="Name">
