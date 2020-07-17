@@ -9,7 +9,18 @@ function login() {
     password: password,
     email: email
   }
-  postData(window.location.origin + '/login', params, true)
+  if(params.username === '') {
+    username.value = "cannot be blank";
+    alert("username cannot be blank");
+  }
+  if (params.password === '') {
+
+    alert("password cannot be blank");
+    password.value = "cannot be blank";
+  }
+  else  {
+    postData(window.location.origin + '/login', params, true)
+  }
 }
 
 function newUser() {
@@ -34,7 +45,9 @@ function newUser() {
     password.value = "cannot be blank";
   }
   else  {
-    postData(window.location.origin + '/newUser', params, false)
+    postData(window.location.origin + '/newUser', params, false);
+    alert("user created");
+    postData(window.location.origin + '/login', params, true)
   }
   
 }
