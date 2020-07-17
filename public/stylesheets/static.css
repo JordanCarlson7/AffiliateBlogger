@@ -26,6 +26,7 @@ body {
     margin: auto;
     color: var(--background);
     padding: 20px;
+    border-radius: 5px;
 }
 #content {
     padding: 20px;
@@ -42,6 +43,7 @@ fieldset {
     margin-top: 10px;
     margin-bottom: 10px;
     border: solid 2px var(--secondary);
+    border-radius: 5px;
 }
 legend {
     width: auto;
