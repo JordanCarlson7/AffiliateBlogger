@@ -521,16 +521,16 @@ function addUserToDb(data, callback) {
 }
 //-------------------------------------------------------------------Adding user
 //LOGIN---------------------------------------------------------------------
-async function login(req, res) {
+function login(req, res) {
     if (req.body.username && req.body.password) {
         try {
             console.log("requesting to login with user", req.body.username, "email", req.body.email);
-            await validateLogin(req.body.username, async function (err, result) {
+            validateLogin(req.body.username, async function (err, result) {
 
                 res.header('content-type', 'application/json');
                 if (err) {
                     console.log(err);
-                    res.status(400).send({ password: 'not found' });
+                    res.status(200).send({ password: 'not found' });
                 }
                 else {
                     currentUserId = result.id;
@@ -576,8 +576,8 @@ function validateLogin(user, callback) {
     var params = [user];
 
     pool.query(sql, params, function (err, result) {
-        if (err) {
-            callback(err, null);
+        if (err || result.rows[0] == undefined) {
+            callback("no user in database", null);
         }
         else {
             console.log("hash", result.rows[0]);

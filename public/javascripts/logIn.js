@@ -3,7 +3,7 @@ function login() {
   var username = document.getElementById('username').value;
   var password = document.getElementById('password').value;
   var email = document.getElementById('email').value;
-
+  var correctPassword = false;
   params = {
     username: username,
     password: password,
@@ -20,6 +20,17 @@ function login() {
   }
   else  {
     postData(window.location.origin + '/login', params, true)
+    .then(function(response) { if (response.password == 'not found') {
+      correctPassword = false;
+      alert("incorrect credentials");
+    } else {
+      correctPassword = true;
+    }
+    if (correctPassword) {
+      window.location.replace(window.location.origin + '/visitor/');
+    }
+  })
+    .catch(err => console.log("catch", err));
   }
 }
 
@@ -45,7 +56,8 @@ function newUser() {
     password.value = "cannot be blank";
   }
   else  {
-    postData(window.location.origin + '/newUser', params, false);
+    const response = postData(window.location.origin + '/newUser', params, false);
+    console.log(response);
     alert("user created");
     postData(window.location.origin + '/login', params, true)
   }
@@ -67,10 +79,7 @@ async function postData(url = '', data = {}, login) {
     body: JSON.stringify(data) // body data type must match "Content-Type" header
   });
 
-  if (login) {
-    window.location.replace(window.location.origin + '/visitor/');
-  }
-
+//console.log(response.json());
   return response.json(); // parses JSON response into native JavaScript objects
 }
 function wait() {}
