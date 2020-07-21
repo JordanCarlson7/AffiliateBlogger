@@ -16,19 +16,19 @@
             <a class="nav-link" id="homeNav" href="/">Home</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="#">      </a>
+            <a class="nav-link" href="#"> </a>
         </li>
         <% blogs.forEach(function (blog) { %>
-            <li class="nav-item">
-                <a class="nav-link" href=/visitor/?id=<%=blog.id %>  ><%= blog.title %></a>
-            </li>
-            <% }) %>
-            <% if (loggedIn) { %>
-                <li class="nav-item">
-                    <button class="nav-link" id="newBlogButton">+</a>
-                </li>
-            <% } %>
-        </ul>
+        <li class="nav-item">
+            <a class="nav-link" href=/visitor/?id=<%=blog.id %>><%= blog.title %></a>
+        </li>
+        <% }) %>
+        <% if (loggedIn) { %>
+        <li class="nav-item">
+            <button class="nav-link" id="newBlogButton">+</a>
+        </li>
+        <% } %>
+    </ul>
     <!---NAV-->
     <div id="feed" class="container">
         <div id="newBlog" style="display: none;">
@@ -41,19 +41,20 @@
                     <input type="text" name="newSubject" id="newSubject" value="" placeholder="Subject">
                     <br>
                     <label for="newBlogContent">Blog:</label>
-                    <textarea name="newBlogContent" id="newBlogContent" placeholder="Today i would like to speak about..."></textarea>
+                    <textarea name="newBlogContent" id="newBlogContent"
+                        placeholder="Today i would like to speak about..."></textarea>
                     <button type="button" id="addBlog">Submit</button>
                 </fieldset>
             </form>
         </div>
         <div id="mainBlog" class="container">
-        <div id="contentHeader" class="container">
-            <h1><%= title %></h1>
-            <h2><%= author %></h2>
-            <h3><%= subject %> : <%= date %></h3>
+            <div id="contentHeader" class="container">
+                <h1><%= title %></h1>
+                <h2><%= author %></h2>
+                <h3><%= subject %> : <%= date %></h3>
+            </div>
+            <div id="content"><%= content %></div>
         </div>
-        <div id="content"><%= content %></div>
-    </div>
         <div id="comments">
             <div id="currentComments">
                 <ul id="commentList">
@@ -84,7 +85,7 @@
             </div>
         </div>
     </div>
-    <footer>Copyright: Jordan Carlson</footer>
+    <footer><h4>Yo-Blog</h4><br><p>Copyright: Jordan Carlson</p></footer>
 </body>
 
 </html>

@@ -1,34 +1,51 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
-            integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-            <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-            <script src="/javascripts/logIn.js"></script>
-            <link rel="stylesheet" type="text/css" href="/stylesheets/static.css">
-    </head>
-    
-    <body>
-        <!---NAV-->
-        <ul class="nav nav-tabs">
-            <li class="nav-item">
-              <a class="nav-link active" href="/">Home</a>
-            </li>
-          </ul>
-        <!---NAV-->
-        <div id="user">
-            <label for="username">Username:</label>
-            <input type="text" name="username" id="username" placeholder="required ('me')">
-            <label for="password">Password:</label>
-            <input type="text" name="password" id="password" placeholder="required ('mypassword')">
-            <label for="email">Email:</label>
-            <input type="text" name="email" id="email" placeholder="not required">
-            <button type="button" onclick="login()">Login</button>
-            <button type="button" onclick="newUser()">Create New User</button>
-            <br>
-            
-        <a  style="text-align: right; padding: 0px;"class="nav-link active" href="/visitor">Continue as Visitor</a>
-        </div>
-        <footer>Copyright: Jordan Carlson</footer>
-    </body>
+
+<head>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="/javascripts/logIn.js"></script>
+    <link rel="stylesheet" type="text/css" href="/stylesheets/static.css">
+    <style>
+        body{
+            background-image: url('/media/pineapple.jpg');
+            background-size:cover;
+        }
+        footer {
+            position: fixed;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            text-align: center;
+            color: var(--primary);
+            background-color: var(--secondary);
+            padding: 20px;
+            font-size: x-small;
+        }
+    </style>
+</head>
+
+<body>
+    <!---NAV-->
+    <ul class="nav nav-tabs">
+        <li class="nav-item">
+            <a class="nav-link active" style="background-color: #00000000;" href="/">Home</a>
+        </li>
+    </ul>
+    <!---NAV-->
+    <div id="user">
+        <label for="username">Username:</label>
+        <input type="text" name="username" id="username" placeholder="required ('me')">
+        <label for="password">Password:</label>
+        <input type="text" name="password" id="password" placeholder="required ('mypassword')">
+        <label for="email">Email:</label>
+        <input type="text" name="email" id="email" placeholder="not required">
+        <button type="button" onclick="login()">Login</button>
+        <button type="button" onclick="newUser()">Create New User</button>
+        <a style=" padding: 0px;" class="nav-link active" href="/visitor">Continue as Visitor</a>
+    </div>
+    <footer><h4>Yo-Blog</h4><br><p>Copyright: Jordan Carlson</p></footer>
+</body>
+
 </html>
